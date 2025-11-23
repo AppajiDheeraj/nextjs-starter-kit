@@ -1,17 +1,25 @@
 import { NextResponse } from "next/server";
 import { render } from "@react-email/render";
-import { EmailTemplates } from "@/emails";
+import MagicLinkEmail from "@/emails/templates/MagicLinkEmail";
 import { transporter } from "@/server/mail/transporter";
+import React from "react";
+import EmailTemplates from "@/emails";
 
 export async function POST(req: Request) {
   try {
-    const { to, url } = await req.json();
+    const body = await req.json();
+    console.log("MAGIC LINK BODY RECEIVED:", body);
 
-    if (!to || !url) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { to, name, magicLink } = body;
+
+    if (!to || !magicLink) {
+      return NextResponse.json(
+        { error: "Missing fields", received: body },
+        { status: 400 }
+      );
     }
 
-    const html = await render(EmailTemplates.MagicLinkEmail({ url }));
+      const html = await render(EmailTemplates.MagicLinkEmail({ name, magicLink }));
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -21,8 +29,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Email failed" }, { status: 500 });
+  } catch (e: any) {
+    console.error("MagicLinkEmail error:", e);
+    return NextResponse.json({ error: "Email failed", details: e.message }, { status: 500 });
   }
 }

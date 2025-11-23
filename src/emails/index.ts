@@ -1,9 +1,14 @@
-import WelcomeEmail from "./templates/welcome-email";
-import MagicLinkEmail from "./templates/magic-link-email";
-import RecentLoginEmail from "./templates/recent-login-email";
+import VerificationEmail from "./templates/VerificationEmail";
+import MagicLinkEmail from "./templates/MagicLinkEmail";
+import WelcomeEmail from "./templates/WelcomeEmail";
+import LoginAlertEmail from "./templates/LoginAlertEmail";
 
 export const EmailTemplates = {
-  WelcomeEmail,
+  VerificationEmail,
   MagicLinkEmail,
-  RecentLoginEmail,
+  WelcomeEmail,
+  LoginAlertEmail,
 };
+
+export type EmailTemplatesType = typeof EmailTemplates;
+export default EmailTemplates;

@@ -1,20 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useTRPC } from "@/trpc/client"
-import { useQuery } from "@tanstack/react-query";
 import { RocketIcon } from "lucide-react";
 import Link from "next/link";
 
 export const DashboardTrial = () => {
-    const trpc = useTRPC();
-    
-    const { data } = useQuery(
-        trpc.premium.getFreeUsage.queryOptions()
-    );
-
-    if (!data) {
-        return null;
-    }
+    // Dummy data
+    const data = {
+        agentCount: 1,
+        meetingCount: 2,
+        maxFreeAgents: 3,
+        maxFreeMeetings: 5
+    };
 
     const { agentCount, meetingCount, maxFreeAgents, maxFreeMeetings } = data;
 
@@ -29,7 +25,7 @@ export const DashboardTrial = () => {
                     <p className="text-xs">
                         {agentCount}/{maxFreeAgents} Agents
                     </p>
-                    <Progress value={(agentCount/maxFreeAgents) * 100} />
+                    <Progress value={(agentCount / maxFreeAgents) * 100} />
                 </div>
             </div>
             <Button

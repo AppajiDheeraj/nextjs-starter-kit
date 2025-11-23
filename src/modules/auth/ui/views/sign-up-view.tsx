@@ -25,6 +25,20 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
+const sendWelcomeEmail = async (email: string, name: string) => {
+  try {
+    await fetch("/api/email/welcome", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ to: email, name }),
+    });
+  } catch (err) {
+    console.error("Failed to send welcome email:", err);
+  }
+};
+
 export const SignUpView = () => {
     const [error, setError] = useState<string | null>(null)
     const [pending, setPending] = useState(false);
@@ -50,9 +64,14 @@ export const SignUpView = () => {
             callbackURL: "/"
         },
             {
-                onSuccess: () => {
+                onSuccess: async () => {
                     setPending(false);
-                    router.push("/");
+
+                    // send welcome email
+                    await sendWelcomeEmail(data.email, data.name);
+
+                    // redirect to onboarding
+                    router.push("/onboarding");
                 },
 
                 onError: ({ error }) => {

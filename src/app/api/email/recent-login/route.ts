@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const html = await render(EmailTemplates.RecentLoginEmail({ location }));
+    const html = await render(EmailTemplates.LoginAlertEmail({ location }));
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,

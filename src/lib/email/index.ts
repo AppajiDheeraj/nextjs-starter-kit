@@ -28,30 +28,6 @@ export const sendEmail = async ({
   console.log("Email sent:", info.messageId);
 };
 
-
-
-export const sendOnboardingEmail = async ({
-  to,
-  username,
-}: {
-  to: string;
-  username: string;
-}) => {
-  const content = onboardingContent({ username });
-
-  const html = emailLayout({
-    title: "Welcome to Meet.AI! 👋",
-    subtitle: "Let’s help you get started",
-    content,
-    timestamp: new Date().toLocaleString("en-US", {
-      dateStyle: "full",
-      timeStyle: "short",
-    }),
-  });
-
-  await sendEmail({ to, subject: "🚀 Welcome to Meet.AI", html });
-};
-
 export const sendMagicLinkEmail = async ({
   to,
   magicLink,
@@ -84,3 +60,5 @@ export const sendMagicLinkEmail = async ({
     html,
   });
 };
+
+export * from "./send-welcome";

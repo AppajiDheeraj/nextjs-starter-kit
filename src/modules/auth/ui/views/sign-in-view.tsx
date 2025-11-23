@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { OctagonAlertIcon } from "lucide-react"
+import { OctagonAlertIcon, EyeIcon, EyeOffIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -25,6 +25,7 @@ const formSchema = z.object({
 export const SignInView = () => {
     const [error, setError] = useState<string | null>(null)
     const [pending, setPending] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -110,12 +111,35 @@ export const SignInView = () => {
                                             <FormItem>
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
-                                                    <Input type="password" placeholder="********" {...field} />
+                                                    <div className="relative">
+                                                        <Input
+                                                            type={showPassword ? "text" : "password"}
+                                                            placeholder="********"
+                                                            {...field}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                                        >
+                                                            {showPassword ? (
+                                                                <EyeOffIcon className="w-4 h-4" />
+                                                            ) : (
+                                                                <EyeIcon className="w-4 h-4" />
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
-                                    />
+/>
+
+                                    <div className="flex justify-end text-xs">
+                                        <Link href="/forgot-password" className="text-muted-foreground hover:text-primary underline underline-offset-4">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
                                 </div>
                                 {!!error && (
                                     <Alert className="bg-destructive/10 border-none ">
@@ -157,7 +181,7 @@ export const SignInView = () => {
                         </form>
                     </Form>
 
-                    <div className="bg-radial from-green-700 to-green-900 relative hidden md:flex flex-col gap-y-4 items-center justify-center">
+                    <div className="bg-radial from-sidebar-accent to-sidebar relative hidden md:flex flex-col gap-y-4 items-center justify-center">
                         <img src={"/logo.svg"} alt="Meet.AI Logo" className="w-[92px] h-[92px]" />
                         <p className="text-2xl font-semibold text-white">
                             Meet.AI

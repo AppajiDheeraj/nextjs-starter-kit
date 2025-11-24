@@ -1,79 +1,91 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
-import { user, session, account, verification } from "@/db/schema";
+import { user as userTable, session, account, verification } from "@/db/schema";
 import { magicLink } from "better-auth/plugins";
 import { eq, type InferSelectModel } from "drizzle-orm";
 
-type User = InferSelectModel<typeof user>;
-import { sendWelcomeEmail } from "@/lib/email";
-import { sendMagicLinkEmail } from "@/lib/email";
+type User = InferSelectModel<typeof userTable>;
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+
+  // =====================================================
+  // SOCIAL PROVIDERS
+  // =====================================================
   socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    },
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbacks: {
-        async onSignIn({ user: u, account }: { user: any; account: any }) {
-          console.log("Google onSignIn callback triggered for email:", u.email);
+        async onSignIn({ user: u, req }: { user: User; req: Request }) {
+          const existing = await db.query.user.findFirst({
+            where: eq(userTable.email, u.email),
+          });
 
-          // Ensure the user object and email are valid before proceeding
-          if (!u || !u.email) {
-            console.error("Auth callback error: User or email is missing.");
-            // Returning false will prevent the sign-in
-            return false;
-          }
-
-          try {
-            const foundUser = await db.query.user.findFirst({
-              where: eq(user.email, u.email),
-            });
-
-            // If no user is found, it's a new sign-up
-            if (!foundUser) {
-              console.log(`New user detected: ${u.email}. Attempting to send welcome email.`);
-
-              await sendWelcomeEmail({
-                to: u.email,
+          if (!existing) {
+            // SEND WELCOME EMAIL via your existing API route
+            await fetch(new URL("/api/email/welcome", req.url), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                to: u.email!,
                 name: u.name ?? "there",
-              });
-
-              console.log(`Welcome email function called for ${u.email}.`);
-            } else {
-              console.log(`Existing user detected: ${u.email}. Skipping welcome email.`);
-            }
-
-            // Return true to allow the sign-in to proceed
-            return true;
-
-          } catch (error) {
-            console.error("Error in onSignIn callback:", error);
-            // Return false to prevent sign-in if an error occurs
-            return false;
+              }),
+            });
           }
+
+          return true;
         },
 
         async redirect({ user }: { user: User }) {
-          // This logic remains the same
+          // NEW USER → ONBOARDING
           if (!user.onboardingCompleted) return "/onboarding";
-          return "/dashboard";
+          return "/home";
+        },
+      },
+    },
+
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      callbacks: {
+        async onSignIn({ user: u, req }: { user: User; req: Request }) {
+          const existing = await db.query.user.findFirst({
+            where: eq(userTable.email, u.email),
+          });
+
+          if (!existing) {
+            await fetch(new URL("/api/email/welcome", req.url), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                to: u.email!,
+                name: u.name ?? "there",
+              }),
+            });
+          }
+
+          return true;
+        },
+
+        async redirect({ user }: { user: User }) {
+          if (!user.onboardingCompleted) return "/onboarding";
+          return "/home";
         },
       },
     },
   },
 
+  // =====================================================
+  // DATABASE
+  // =====================================================
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user,
+      user: userTable,
       session,
       account,
       verification,
@@ -87,15 +99,44 @@ export const auth = betterAuth({
 
   appName: "Money Matters",
 
+  // =====================================================
+  // MAGIC LINK PLUGIN
+  // =====================================================
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        console.log("📩 Sending BetterAuth magic link:", url);
-        await sendMagicLinkEmail({
-          to: email,
-          magicLink: url,
+        console.log("📩 Magic Link:", url);
+
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/email/magic-link`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to: email, magicLink: url }),
         });
       },
     }),
   ],
+
+  // =====================================================
+  // EMAIL + PASSWORD SIGNUP
+  // =====================================================
+  callbacks: {
+    async onUserCreate({ user: u, req }: { user: User; req: Request }) {
+      // Only email/password users reach here
+      await fetch(new URL("/api/email/welcome", req.url), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: u.email!,
+          name: u.name ?? "there",
+        }),
+      });
+
+      return true;
+    },
+
+    async redirect({ user }: { user: User }) {
+      if (!user.onboardingCompleted) return "/onboarding";
+      return "/home";
+    },
+  },
 });

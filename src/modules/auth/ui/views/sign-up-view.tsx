@@ -26,17 +26,17 @@ const formSchema = z.object({
 });
 
 const sendWelcomeEmail = async (email: string, name: string) => {
-  try {
-    await fetch("/api/email/welcome", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ to: email, name }),
-    });
-  } catch (err) {
-    console.error("Failed to send welcome email:", err);
-  }
+    try {
+        await fetch("/api/email/welcome", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ to: email, name }),
+        });
+    } catch (err) {
+        console.error("Failed to send welcome email:", err);
+    }
 };
 
 export const SignUpView = () => {
@@ -61,7 +61,7 @@ export const SignUpView = () => {
             name: data.name,
             email: data.email,
             password: data.password,
-            callbackURL: "/"
+            callbackURL: "/home"
         },
             {
                 onSuccess: async () => {
@@ -86,7 +86,7 @@ export const SignUpView = () => {
         setPending(true);
         authClient.signIn.social({
             provider: provider,
-            callbackURL: "/"
+            callbackURL: "/home"
         },
             {
                 onSuccess: () => {

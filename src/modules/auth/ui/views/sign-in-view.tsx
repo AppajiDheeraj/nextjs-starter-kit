@@ -41,12 +41,17 @@ export const SignInView = () => {
         authClient.signIn.email({
             email: data.email,
             password: data.password,
-            callbackURL: "/"
+            callbackURL: "/home"
         },
             {
-                onSuccess: () => {
+                onSuccess: async () => {
+                    const session = await authClient.getSession();
                     setPending(false);
-                    router.push("/");
+                    if (session.data?.user.onboardingCompleted) {
+                        router.push("/home");
+                    } else {
+                        router.push("/onboarding");
+                    }
                 },
 
                 onError: ({ error }) => {
@@ -61,7 +66,7 @@ export const SignInView = () => {
         setPending(true);
         authClient.signIn.social({
             provider: provider,
-            callbackURL: "/"
+            callbackURL: "/home"
         },
             {
                 onSuccess: () => {
@@ -133,7 +138,7 @@ export const SignInView = () => {
                                                 <FormMessage />
                                             </FormItem>
                                         )}
-/>
+                                    />
 
                                     <div className="flex justify-end text-xs">
                                         <Link href="/forgot-password" className="text-muted-foreground hover:text-primary underline underline-offset-4">

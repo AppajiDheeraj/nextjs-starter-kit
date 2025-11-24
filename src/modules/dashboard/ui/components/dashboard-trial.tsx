@@ -15,7 +15,7 @@ export const DashboardTrial = () => {
     const { agentCount, meetingCount, maxFreeAgents, maxFreeMeetings } = data;
 
     return (
-        <div className="border border-border/10 rounded-lg bg-white/5 flex flex-col gap-y-2">
+        <div className="border border-border/10 rounded-lg bg-white/5 flex flex-col gap-y-2 text-black">
             <div className="p-3 flex flex-col gap-y-4">
                 <div className="flex items-center gap-2">
                     <RocketIcon className="size-4" />
@@ -30,7 +30,7 @@ export const DashboardTrial = () => {
             </div>
             <Button
                 asChild
-                className="bg-transparent border-t border-border/10 hover:bg-white/10 rounded-t-none"
+                className="bg-transparent border-t border-border/10 hover:bg-white/10 rounded-t-none text-black"
             >
                 <Link href="/upgrade">
                     Upgrade

@@ -25,7 +25,7 @@ const DEFAULT_LOGO = process.env.EMAIL_LOGO_URL ?? "/mnt/data/LifeBuddy-AI.pdf";
 
 export default function WelcomeEmail({
     name = "Friend",
-    ctaUrl = "https://yourapp.com/dashboard",
+    ctaUrl = "https://yourapp.com/home",
     logoUrl = DEFAULT_LOGO,
 }: WelcomeEmailProps) {
     return (

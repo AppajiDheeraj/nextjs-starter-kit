@@ -15,13 +15,13 @@ import { DashboardTrial } from "./dashboard-trial";
 const firstSection = [
     {
         icon: VideoIcon,
-        label: "Meetings",
-        href: "/meetings"
+        label: "Home",
+        href: "/home"
     },
     {
         icon: BotIcon,
-        label: "Agents",
-        href: "/agents"
+        label: "Payments",
+        href: "/payments"
     },
     {
         icon: SettingsIcon,
@@ -75,7 +75,7 @@ export const DashboardSidebar = () => {
                     </SidebarGroupContent>
                 </SidebarGroup>
                 <div className="px-4 py-1">
-                    <Separator className="opacity-10 text-[#5D6B68]" />
+                    <Separator className="opacity-100 text-gray-500" />
                 </div>
                 <SidebarGroup>
                     <SidebarGroupContent>
